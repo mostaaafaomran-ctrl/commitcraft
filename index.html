@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CommitCraft | Conventional commit message from your git diff, offline</title>
+<meta name="description" content="Paste your git diff, get a Conventional Commits message with type, scope and subject. Edit it, copy the git commit command. Runs in your browser, your code never leaves it.">
+<meta property="og:title" content="CommitCraft">
+<meta property="og:description" content="Paste a git diff, get a conventional commit message. Offline, private, no AI key.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%23020b04'/%3E%3Cpath d='M22 30l22 20-22 20' stroke='%2333ff66' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M52 72h28' stroke='%2333ff66' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{--g:#33ff66;--g2:#1fa844;--dim:#1b7a35;--bg:#020b04;--panel:#04140a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--g);font:15px/1.55 "SF Mono","Cascadia Code",Consolas,"Courier New",monospace;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,#0000 0 2px,#00000055 2px 3px);pointer-events:none;z-index:5}
+body:after{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,#000c 100%);pointer-events:none;z-index:4}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 18px 60px;position:relative;z-index:1}
+.bar{color:var(--dim)}
+h1{font-size:clamp(26px,5vw,44px);margin:12px 0 4px;text-shadow:0 0 12px #33ff6688;font-weight:700;letter-spacing:-1px}
+h1:before{content:"$ ";color:var(--dim)}
+.cur{display:inline-block;width:.6em;height:1em;background:var(--g);vertical-align:-.1em;animation:b 1s steps(1) infinite;margin-inline-start:4px}
+@keyframes b{50%{opacity:0}}
+p.lead{color:var(--g2);margin:0 0 22px;max-width:640px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.pan{border:1px solid var(--dim);background:var(--panel);padding:14px;box-shadow:0 0 18px #33ff6618 inset}
+.pan h2{margin:0 0 8px;font-size:13px;letter-spacing:2px;color:var(--dim);font-weight:400}
+textarea{width:100%;height:330px;background:#000;color:var(--g);border:1px solid var(--dim);padding:10px;font:13px/1.45 inherit;resize:vertical}
+textarea:focus,input:focus,select:focus{outline:1px solid var(--g);box-shadow:0 0 10px #33ff6655}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+select,input[type=text]{background:#000;color:var(--g);border:1px solid var(--dim);padding:7px 9px;font:inherit}
+input[type=text]{flex:1;min-width:120px}
+.msg{white-space:pre-wrap;background:#000;border:1px dashed var(--g2);padding:12px;min-height:70px;color:#b6ffc8;text-shadow:0 0 6px #33ff6666;word-break:break-word}
+.len{font-size:12px;color:var(--dim);margin-top:4px}.len.bad{color:#ffb347}
+button{background:transparent;color:var(--g);border:1px solid var(--g);padding:7px 14px;font:inherit;cursor:pointer;text-transform:lowercase}
+button:hover{background:var(--g);color:#000}
+label.c{display:flex;gap:6px;align-items:center;color:var(--g2)}
+.files{color:var(--g2);font-size:13px;margin-top:10px}
+.files b{color:var(--g)}
+.tag{display:inline-block;border:1px solid var(--dim);padding:0 6px;margin:2px;font-size:12px}
+footer{margin-top:30px;color:var(--dim);font-size:12px}
+a{color:var(--g)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="bar">commitcraft v1.0 · offline · no ai key · nothing leaves this tab</div>
+<h1>commitcraft<span class="cur"></span></h1>
+<p class="lead">Paste the output of <b>git diff</b> or <b>git diff --staged</b>. Get a Conventional Commits message. Fix what it got wrong, copy the command.</p>
+<div class="grid">
+<div class="pan"><h2>INPUT: GIT DIFF</h2>
+<textarea id="d" spellcheck="false" placeholder="$ git diff --staged | pbcopy&#10;(paste here)"></textarea>
+<div class="row" style="margin:10px 0 0"><button id="ex">load example</button><button id="clr">clear</button></div></div>
+<div class="pan"><h2>OUTPUT: COMMIT MESSAGE</h2>
+<div class="row"><select id="ty"></select><input type="text" id="sc" placeholder="scope"><label class="c"><input type="checkbox" id="br"> breaking</label></div>
+<div class="row"><input type="text" id="sj" placeholder="subject"></div>
+<label class="c" style="margin-bottom:10px"><input type="checkbox" id="bd"> include file list as body</label>
+<div class="msg" id="msg">waiting for diff...</div><div class="len" id="len"></div>
+<div class="row" style="margin-top:12px"><button id="cm">copy message</button><button id="cc">copy git commit command</button></div>
+<div class="files" id="fl"></div></div>
+</div>
+<footer>MIT · github.com/mostaaafaomran-ctrl/commitcraft · rules-based, review before you commit</footer>
+</div>
+<script src="commitcraft.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const TYPES=['feat','fix','docs','style','refactor','perf','test','build','ci','chore','revert'];
+$('ty').innerHTML=TYPES.map(t=>'<option>'+t+'</option>').join('');
+let cur=null;
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function analyze(){
+  cur=CommitCraft.suggest($('d').value);
+  if(!cur){$('msg').textContent='waiting for diff...';$('fl').innerHTML='';$('len').textContent='';return}
+  $('ty').value=cur.type==='chore'&&0?'build':cur.type;$('sc').value=cur.scope;$('sj').value=cur.subject;$('br').checked=cur.breaking;
+  $('fl').innerHTML='<b>'+cur.files.length+' file'+(cur.files.length==1?'':'s')+'</b> · +'+cur.adds+' -'+cur.dels+'<br>'+cur.files.slice(0,12).map(f=>'<span class="tag">'+esc(f.path)+'</span>').join('');
+  show();
+}
+function show(){
+  if(!cur)return;
+  const o={type:$('ty').value,scope:$('sc').value.trim(),subject:$('sj').value.trim(),body:cur.body,breaking:$('br').checked,withBody:$('bd').checked};
+  const m=CommitCraft.format(o);$('msg').textContent=m;
+  const h=m.split('\n')[0].length;$('len').textContent='header '+h+' chars'+(h>72?' · too long, aim for 72 or less':'');$('len').className='len'+(h>72?' bad':'');
+  window.__m=m;
+}
+function copy(t,btn){const old=btn.textContent;const ok=()=>{btn.textContent='copied';setTimeout(()=>btn.textContent=old,1200)};
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(ok).catch(()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();ok()})}
+$('d').addEventListener('input',analyze);
+['ty','sc','sj','br','bd'].forEach(i=>$(i).addEventListener('input',show));
+$('clr').onclick=()=>{$('d').value='';analyze()};
+$('cm').onclick=e=>cur&&copy(window.__m,e.target);
+$('cc').onclick=e=>{if(!cur)return;const parts=window.__m.split('\n\n');const q=s=>"'"+s.replace(/'/g,"'\\''")+"'";copy('git commit '+parts.map(p=>'-m '+q(p)).join(' '),e.target)};
+const EX=`diff --git a/src/auth/login.js b/src/auth/login.js
+index 3f2a1b4..9c8d7e6 100644
+--- a/src/auth/login.js
++++ b/src/auth/login.js
+@@ -10,6 +10,14 @@ import { api } from '../api.js';
++export async function validateSession(token) {
++  if (!token) return null;
++  const res = await api.get('/session', { token });
++  return res.ok ? res.data : null;
++}
++
+ export function login(user, pass) {
+-  return api.post('/login', { user, pass });
++  if (!user || !pass) throw new Error('Missing credentials');
++  return api.post('/login', { user, pass });
+ }
+diff --git a/src/auth/session.js b/src/auth/session.js
+new file mode 100644
+--- /dev/null
++++ b/src/auth/session.js
+@@ -0,0 +1,8 @@
++export const sessionKey = 'app.session';
++export const saveSession = (s) => localStorage.setItem(sessionKey, JSON.stringify(s));
++export const clearSession = () => localStorage.removeItem(sessionKey);
+`;
+$('ex').onclick=()=>{$('d').value=EX;analyze()};
+if(new URLSearchParams(location.search).get('demo')==='1'){$('bd').checked=true;$('ex').click()}
+</script>
+</body>
+</html>
